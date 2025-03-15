@@ -30,6 +30,7 @@
             background-color: white;
             cursor: pointer;
             transition: 0.3s;
+            min-width: 100px;
         }
         button:hover {
             background-color: #ddd;
@@ -42,7 +43,7 @@
     </style>
 </head>
 <body>
-    <h1>ごまきちはたぶんここ</h1>
+    <h1>ごまきちはどこ？</h1>
     <div class="button-container">
         <button id="btn1" onclick="updateLocation(1)">1階</button>
         <button id="btn2" onclick="updateLocation(2)">2階</button>
@@ -52,36 +53,38 @@
         const apiUrl = "https://script.google.com/macros/s/AKfycbyzpD4A5ZuO60GNBEpmv1723JZbIDhYOWMPnxzSun_zvEixI1EzIOiLeiO0m4GpB83Eig/exec"; 
         let lastFloor = null;
 
+        // ボタンをクリックした際にスプレッドシートの値を更新
         async function updateLocation(floor) {
             try {
-                let response = await fetch(apiUrl, {
+                await fetch(apiUrl, {
                     method: "POST",
-                    mode: "no-cors",  // ← 追加
+                    mode: "no-cors",
                     headers: { "Content-Type": "application/x-www-form-urlencoded" },
                     body: `value=${floor}`
                 });
 
-                highlightButton(floor);
+                checkLocation(); // ボタンを押した直後に最新データを取得
             } catch (error) {
                 console.error("POSTエラー:", error);
             }
         }
 
+        // スプレッドシートから最新のデータを取得
         async function checkLocation() {
             try {
-                let response = await fetch(apiUrl);
+                let response = await fetch(apiUrl, { cache: "no-store" }); // キャッシュを使わない
                 let floor = await response.text();
 
                 if (floor !== lastFloor) {
                     lastFloor = floor;
                     highlightButton(floor);
-                    showNotification(floor);
                 }
             } catch (error) {
                 console.error("GETエラー:", error);
             }
         }
 
+        // 取得した値に応じてボタンをハイライト
         function highlightButton(floor) {
             document.getElementById("btn1").classList.remove("active");
             document.getElementById("btn2").classList.remove("active");
@@ -93,20 +96,8 @@
             }
         }
 
-        function showNotification(floor) {
-            if (Notification.permission === "granted") {
-                new Notification(`ごまきちは ${floor === "1" ? "1階" : "2階"} にいます`);
-            } else {
-                alert(`ごまきちは ${floor === "1" ? "1階" : "2階"} にいます`); // ← iOS用に変更
-            }
-        }
-
-        if (Notification.permission !== "granted") {
-            Notification.requestPermission();
-        }
-
-        setInterval(checkLocation, 2000); // 2秒ごとにチェック
-        checkLocation();
+        setInterval(checkLocation, 2000); // 2秒ごとにデータ取得
+        checkLocation(); // 初期表示
     </script>
 </body>
 </html>
