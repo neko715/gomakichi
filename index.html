@@ -50,7 +50,7 @@
     </style>
 </head>
 <body>
-    <h1>ごまきちの居場所</h1>
+    <h1>ごまきちはたぶんここ</h1>
     <div class="button-container">
         <button id="btn1" onclick="updateLocation(1)">1階</button>
         <button id="btn2" onclick="updateLocation(2)">2階</button>
@@ -101,9 +101,6 @@
                     lastFloor = floor;
                     highlightButton(floor);
                 }
-                
-                // 通信が完了したので、通信中表示を終了
-                showLoading(false);
             } catch (error) {
                 console.error("GETエラー:", error);
             }
@@ -119,6 +116,9 @@
             } else if (floor == "2") {
                 document.getElementById("btn2").classList.add("active");
             }
+
+            // ハイライト後に通信中表示を終了
+            showLoading(false);
         }
 
         setInterval(checkLocation, 2000); // 2秒ごとにデータ取得
