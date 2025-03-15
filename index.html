@@ -5,18 +5,52 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ごまきちの居場所</title>
     <style>
-        body { text-align: center; font-family: Arial, sans-serif; }
-        button { font-size: 24px; padding: 10px; margin: 10px; }
-        .active { background-color: red; color: white; }
+        body { 
+            text-align: center; 
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            justify-content: center;
+            background-color: #f9f9f9;
+        }
+        h1 {
+            margin-bottom: 20px;
+        }
+        .button-container {
+            display: flex;
+            gap: 20px;
+        }
+        button { 
+            font-size: 24px; 
+            padding: 15px 40px; 
+            border: 2px solid #555;
+            border-radius: 10px;
+            background-color: white;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        button:hover {
+            background-color: #ddd;
+        }
+        .active {
+            background-color: red !important;
+            color: white;
+            border-color: red;
+        }
     </style>
 </head>
 <body>
-    <h1>ごまきちはここ</h1>
-    <button id="btn1" onclick="updateLocation(1)">1階</button>
-    <button id="btn2" onclick="updateLocation(2)">2階</button>
+    <h1>ごまきちはここにいる？</h1>
+    <div class="button-container">
+        <button id="btn1" onclick="updateLocation(1)">1階</button>
+        <button id="btn2" onclick="updateLocation(2)">2階</button>
+    </div>
 
     <script>
         const apiUrl = "https://script.google.com/macros/s/AKfycbyzpD4A5ZuO60GNBEpmv1723JZbIDhYOWMPnxzSun_zvEixI1EzIOiLeiO0m4GpB83Eig/exec"; 
+        let lastFloor = null;
 
         async function updateLocation(floor) {
             await fetch(apiUrl, {
@@ -30,7 +64,12 @@
         async function checkLocation() {
             const response = await fetch(apiUrl);
             const floor = await response.text();
-            highlightButton(floor);
+
+            if (floor !== lastFloor) {
+                lastFloor = floor;
+                highlightButton(floor);
+                showNotification(floor);
+            }
         }
 
         function highlightButton(floor) {
@@ -44,7 +83,17 @@
             }
         }
 
-        setInterval(checkLocation, 500);
+        function showNotification(floor) {
+            if (Notification.permission === "granted") {
+                new Notification(`ごまきちは ${floor === "1" ? "1階" : "2階"} にいます`);
+            }
+        }
+
+        if (Notification.permission !== "granted") {
+            Notification.requestPermission();
+        }
+
+        setInterval(checkLocation, 1000);
         checkLocation();
     </script>
 </body>
