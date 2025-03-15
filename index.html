@@ -42,7 +42,7 @@
     </style>
 </head>
 <body>
-    <h1>ごまきちはここにいる？</h1>
+    <h1>ごまきちはどこ？</h1>
     <div class="button-container">
         <button id="btn1" onclick="updateLocation(1)">1階</button>
         <button id="btn2" onclick="updateLocation(2)">2階</button>
@@ -53,22 +53,39 @@
         let lastFloor = null;
 
         async function updateLocation(floor) {
-            await fetch(apiUrl, {
-                method: "POST",
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: `value=${floor}`
-            });
-            highlightButton(floor);
+            try {
+                let response = await fetch(apiUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: `value=${floor}`
+                });
+
+                let text = await response.text();
+                console.log("POST Response:", text); // デバッグ用ログ
+
+                if (text === "OK") {
+                    highlightButton(floor);
+                } else {
+                    console.error("データ更新に失敗:", text);
+                }
+            } catch (error) {
+                console.error("POSTエラー:", error);
+            }
         }
 
         async function checkLocation() {
-            const response = await fetch(apiUrl);
-            const floor = await response.text();
+            try {
+                let response = await fetch(apiUrl);
+                let floor = await response.text();
+                console.log("GET Response:", floor); // デバッグ用ログ
 
-            if (floor !== lastFloor) {
-                lastFloor = floor;
-                highlightButton(floor);
-                showNotification(floor);
+                if (floor !== lastFloor) {
+                    lastFloor = floor;
+                    highlightButton(floor);
+                    showNotification(floor);
+                }
+            } catch (error) {
+                console.error("GETエラー:", error);
             }
         }
 
