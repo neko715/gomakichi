@@ -4,82 +4,48 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ごまきちの居場所</title>
-    <link rel="manifest" href="manifest.json">
     <style>
-        body {
-            text-align: center;
-            font-family: Arial, sans-serif;
-        }
-        button {
-            font-size: 20px;
-            padding: 15px;
-            margin: 10px;
-            width: 120px;
-            border: none;
-            cursor: pointer;
-        }
-        .active {
-            background-color: red;
-            color: white;
-        }
+        body { text-align: center; font-family: Arial, sans-serif; }
+        button { font-size: 24px; padding: 10px; margin: 10px; }
+        .active { background-color: red; color: white; }
     </style>
 </head>
 <body>
     <h1>ごまきちはどこ？</h1>
-    <button id="floor1">1階</button>
-    <button id="floor2">2階</button>
+    <button id="btn1" onclick="updateLocation(1)">1階</button>
+    <button id="btn2" onclick="updateLocation(2)">2階</button>
 
     <script>
-        const apiUrl = "https://script.google.com/macros/s/AKfycbyzpD4A5ZuO60GNBEpmv1723JZbIDhYOWMPnxzSun_zvEixI1EzIOiLeiO0m4GpB83Eig/exec"; // Google Apps ScriptのURL
+        const apiUrl = "https://script.google.com/macros/s/AKfycbyzpD4A5ZuO60GNBEpmv1723JZbIDhYOWMPnxzSun_zvEixI1EzIOiLeiO0m4GpB83Eig/exec"; 
 
-        // 現在の階を取得
-        async function fetchFloor() {
-            const response = await fetch(apiUrl);
-            const floor = await response.text();
-            updateUI(floor);
-        }
-
-        // UIを更新
-        function updateUI(floor) {
-            document.getElementById("floor1").classList.remove("active");
-            document.getElementById("floor2").classList.remove("active");
-            if (floor == "1") {
-                document.getElementById("floor1").classList.add("active");
-            } else if (floor == "2") {
-                document.getElementById("floor2").classList.add("active");
-            }
-        }
-
-        // ボタンを押したときの処理
-        async function updateFloor(floor) {
+        async function updateLocation(floor) {
             await fetch(apiUrl, {
                 method: "POST",
                 headers: { "Content-Type": "application/x-www-form-urlencoded" },
                 body: `value=${floor}`
             });
-            fetchFloor();
-            showNotification(floor);
+            highlightButton(floor);
         }
 
-        // 通知を表示
-        function showNotification(floor) {
-            if (Notification.permission === "granted") {
-                new Notification(`ごまきちは ${floor === "1" ? "1階" : "2階"} にいます`);
+        async function checkLocation() {
+            const response = await fetch(apiUrl);
+            const floor = await response.text();
+            highlightButton(floor);
+        }
+
+        function highlightButton(floor) {
+            document.getElementById("btn1").classList.remove("active");
+            document.getElementById("btn2").classList.remove("active");
+
+            if (floor == "1") {
+                document.getElementById("btn1").classList.add("active");
+            } else if (floor == "2") {
+                document.getElementById("btn2").classList.add("active");
             }
         }
 
-        // 通知の許可リクエスト
-        if (Notification.permission !== "granted") {
-            Notification.requestPermission();
-        }
-
-        // ボタンのイベントリスナー
-        document.getElementById("floor1").addEventListener("click", () => updateFloor("1"));
-        document.getElementById("floor2").addEventListener("click", () => updateFloor("2"));
-
-        // 定期的に更新
-        setInterval(fetchFloor,1000); // 5秒ごとに更新
-        fetchFloor();
+        setInterval(checkLocation, 5000);
+        checkLocation();
     </script>
 </body>
 </html>
