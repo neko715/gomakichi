@@ -42,7 +42,7 @@
     </style>
 </head>
 <body>
-    <h1>ごまきちはここ</h1>
+    <h1>ごまきちはたぶんここ</h1>
     <div class="button-container">
         <button id="btn1" onclick="updateLocation(1)">1階</button>
         <button id="btn2" onclick="updateLocation(2)">2階</button>
@@ -56,18 +56,12 @@
             try {
                 let response = await fetch(apiUrl, {
                     method: "POST",
+                    mode: "no-cors",  // ← 追加
                     headers: { "Content-Type": "application/x-www-form-urlencoded" },
                     body: `value=${floor}`
                 });
 
-                let text = await response.text();
-                console.log("POST Response:", text); // デバッグ用ログ
-
-                if (text === "OK") {
-                    highlightButton(floor);
-                } else {
-                    console.error("データ更新に失敗:", text);
-                }
+                highlightButton(floor);
             } catch (error) {
                 console.error("POSTエラー:", error);
             }
@@ -77,7 +71,6 @@
             try {
                 let response = await fetch(apiUrl);
                 let floor = await response.text();
-                console.log("GET Response:", floor); // デバッグ用ログ
 
                 if (floor !== lastFloor) {
                     lastFloor = floor;
@@ -103,6 +96,8 @@
         function showNotification(floor) {
             if (Notification.permission === "granted") {
                 new Notification(`ごまきちは ${floor === "1" ? "1階" : "2階"} にいます`);
+            } else {
+                alert(`ごまきちは ${floor === "1" ? "1階" : "2階"} にいます`); // ← iOS用に変更
             }
         }
 
@@ -110,7 +105,7 @@
             Notification.requestPermission();
         }
 
-        setInterval(checkLocation, 1000);
+        setInterval(checkLocation, 2000); // 2秒ごとにチェック
         checkLocation();
     </script>
 </body>
