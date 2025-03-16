@@ -50,7 +50,7 @@
     </style>
 </head>
 <body>
-    <h1>ごまきちの居場所</h1>
+    <h1>ごまきちはここ</h1>
     <div class="button-container">
         <button id="btn1" onclick="updateLocation(1)">1階</button>
         <button id="btn2" onclick="updateLocation(2)">2階</button>
@@ -74,14 +74,15 @@
             try {
                 showLoading(true); // 通信中表示を開始
 
+                let formData = new FormData();
+                formData.append("value", floor);
+
                 await fetch(apiUrl, {
                     method: "POST",
-                    mode: "no-cors",
-                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                    body: `value=${floor}`
+                    body: formData
                 });
 
-                checkLocation(); // 最新データを取得
+                setTimeout(checkLocation, 1000); // 1秒後に最新データを取得
             } catch (error) {
                 console.error("POSTエラー:", error);
             }
