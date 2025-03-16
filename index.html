@@ -63,6 +63,27 @@
         const apiUrl = "https://script.google.com/macros/s/AKfycby9pvyPgl9il3L9Bir27y7zWzVgkk4qhpFUOS4yzk6corjrxd4qZf-xVTBmhUl8cxA1Dw/exec"; 
         let lastFloor = null;
 
+        // 通知の許可を求める
+        function requestNotificationPermission() {
+            if ("Notification" in window) {
+                Notification.requestPermission().then(permission => {
+                    if (permission === "granted") {
+                        console.log("通知が許可されました");
+                    }
+                });
+            }
+        }
+
+        // 通知を表示
+        function showNotification(floor) {
+            if ("Notification" in window && Notification.permission === "granted") {
+                new Notification("ごまきちの居場所", {
+                    body: `ごまきちは${floor}階にいます！`,
+                    icon: "https://cdn-icons-png.flaticon.com/512/616/616430.png" // 任意のアイコン
+                });
+            }
+        }
+
         // 通信中の状態を表示
         function showLoading(isLoading) {
             const loadingElement = document.getElementById('loading');
@@ -97,6 +118,7 @@
                 if (floor !== lastFloor) {
                     lastFloor = floor;
                     highlightButton(floor);
+                    showNotification(floor); // 階数が変わったら通知を送る
                 }
             } catch (error) {
                 console.error("GETエラー:", error);
@@ -119,6 +141,9 @@
 
             showLoading(false); // ハイライト後に通信中表示を終了
         }
+
+        // 初回に通知の許可を求める
+        requestNotificationPermission();
 
         setInterval(checkLocation, 2000); // 2秒ごとにデータ取得
         checkLocation(); // 初期表示
