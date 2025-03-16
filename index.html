@@ -50,10 +50,11 @@
     </style>
 </head>
 <body>
-    <h1>ごまきちはたぶんここ</h1>
+    <h1>ごまきちの居場所</h1>
     <div class="button-container">
         <button id="btn1" onclick="updateLocation(1)">1階</button>
         <button id="btn2" onclick="updateLocation(2)">2階</button>
+        <button id="btn3" onclick="updateLocation(3)">その他</button>
     </div>
 
     <div id="loading">通信中...</div> <!-- 通信中表示 -->
@@ -65,18 +66,13 @@
         // 通信中の状態を表示
         function showLoading(isLoading) {
             const loadingElement = document.getElementById('loading');
-            if (isLoading) {
-                loadingElement.style.display = 'block';
-            } else {
-                loadingElement.style.display = 'none';
-            }
+            loadingElement.style.display = isLoading ? 'block' : 'none';
         }
 
         // ボタンをクリックした際にスプレッドシートの値を更新
         async function updateLocation(floor) {
             try {
-                // 通信中表示を開始
-                showLoading(true);
+                showLoading(true); // 通信中表示を開始
 
                 await fetch(apiUrl, {
                     method: "POST",
@@ -85,7 +81,7 @@
                     body: `value=${floor}`
                 });
 
-                checkLocation(); // ボタンを押した直後に最新データを取得
+                checkLocation(); // 最新データを取得
             } catch (error) {
                 console.error("POSTエラー:", error);
             }
@@ -94,7 +90,7 @@
         // スプレッドシートから最新のデータを取得
         async function checkLocation() {
             try {
-                let response = await fetch(apiUrl, { cache: "no-store" }); // キャッシュを使わない
+                let response = await fetch(apiUrl, { cache: "no-store" });
                 let floor = await response.text();
 
                 if (floor !== lastFloor) {
@@ -110,15 +106,17 @@
         function highlightButton(floor) {
             document.getElementById("btn1").classList.remove("active");
             document.getElementById("btn2").classList.remove("active");
+            document.getElementById("btn3").classList.remove("active");
 
             if (floor == "1") {
                 document.getElementById("btn1").classList.add("active");
             } else if (floor == "2") {
                 document.getElementById("btn2").classList.add("active");
+            } else if (floor == "3") {
+                document.getElementById("btn3").classList.add("active");
             }
 
-            // ハイライト後に通信中表示を終了
-            showLoading(false);
+            showLoading(false); // ハイライト後に通信中表示を終了
         }
 
         setInterval(checkLocation, 2000); // 2秒ごとにデータ取得
